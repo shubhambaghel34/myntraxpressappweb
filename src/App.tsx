@@ -16,6 +16,7 @@ import { Product, Category } from './types';
 // Import dummy data
 import productsData from './data/products.json';
 import categoriesData from './data/categories.json';
+import dailyRequirement from './dailyRequirement';
 
 function AppContent() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -56,6 +57,20 @@ function AppContent() {
       <div className="min-h-screen bg-gray-50">
         <Header categories={categories} />
         
+        <div className="bg-primary-50 border-b border-primary-200 py-6">
+          <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.3em] text-primary-700 font-semibold">Daily Improvement</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-dark-900 mt-2">Day {dailyRequirement.day} Task</h1>
+              <p className="mt-2 text-gray-700 max-w-2xl">{dailyRequirement.requirement}</p>
+            </div>
+            <div className="bg-white rounded-2xl shadow-sm p-5 text-center">
+              <p className="text-sm text-gray-500">Current requirement file</p>
+              <p className="text-3xl font-bold text-primary-600 mt-2">Day {dailyRequirement.day}</p>
+            </div>
+          </div>
+        </div>
+
         <main>
           <Routes>
             <Route path="/" element={<LandingPage products={products} categories={categories} />} />
