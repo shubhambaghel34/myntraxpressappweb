@@ -1,61 +1,58 @@
 name: Daily React Improvement
 
 on:
-schedule:
-- cron: "17 8 * * *"
-workflow_dispatch:
+  schedule:
+    - cron: "17 8 * * *"
+  workflow_dispatch:
 
 permissions:
-contents: write
+  contents: write
 
 jobs:
-daily-update:
-runs-on: ubuntu-latest
+  daily-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-```
-steps:
-  - name: Checkout
-    uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-  - name: Setup Node
-    uses: actions/setup-node@v4
-    with:
-      node-version: 20
+      - name: Install Dependencies
+        run: npm install
 
-  - name: Install Dependencies
-    run: npm install
+      - name: Read Current Day
+        id: progress
+        run: |
+          if [ ! -f progress.json ]; then
+            echo '{"currentDay":1}' > progress.json
+          fi
 
-  - name: Read Current Day
-    id: progress
-    run: |
-      if [ ! -f progress.json ]; then
-        echo '{"currentDay":1}' > progress.json
-      fi
+          DAY=$(node -e "console.log(require('./progress.json').currentDay)")
+          echo "day=$DAY" >> $GITHUB_OUTPUT
 
-      DAY=$(node -e "console.log(require('./progress.json').currentDay)")
-      echo "day=$DAY" >> $GITHUB_OUTPUT
+      - name: Update Activity
+        run: |
+          mkdir -p automation
+          echo "Day ${{ steps.progress.outputs.day }} completed on $(date)" >> automation/activity.log
 
-  - name: Update Activity
-    run: |
-      mkdir -p automation
-      echo "Day ${{ steps.progress.outputs.day }} completed on $(date)" >> automation/activity.log
+      - name: Build
+        run: npm run build --if-present
 
-  - name: Build
-    run: npm run build --if-present
+      - name: Commit Changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-  - name: Commit Changes
-    run: |
-      git config user.name "github-actions[bot]"
-      git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          node -e "
+            const fs = require('fs');
+            const p = require('./progress.json');
+            p.currentDay = p.currentDay + 1;
+            fs.writeFileSync('progress.json', JSON.stringify(p, null, 2));
+          "
 
-      node -e "
-      const fs=require('fs');
-      const p=require('./progress.json');
-      p.currentDay=p.currentDay+1;
-      fs.writeFileSync('progress.json',JSON.stringify(p,null,2));
-      "
-
-      git add .
-      git commit -m "feat: day-${{ steps.progress.outputs.day }} improvement" || exit 0
-      git push
-```
+          git add .
+          git commit -m "feat: day-${{ steps.progress.outputs.day }} improvement" || exit 0
+          git push
