@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Star, Truck, Shield, RefreshCw, ChevronLeft, ChevronRight, Minus, Plus } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -10,13 +10,21 @@ interface ProductDetailsProps {
 
 export default function ProductDetails({ products }: ProductDetailsProps) {
   const { productId } = useParams<{ productId: string }>();
-  const { dispatch, isInWishlist } = useApp();
+  const { dispatch, isInWishlist, state } = useApp();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
 
   const product = products.find(p => p.id === Number(productId));
+
+  useEffect(() => {
+    if (product) {
+      dispatch({ type: 'ADD_RECENTLY_VIEWED', payload: product });
+    }
+  }, [dispatch, product]);
+
+  const recentlyViewedProducts = state.recentlyViewed.slice(0, 4);
 
   if (!product) {
     return (
@@ -342,6 +350,32 @@ export default function ProductDetails({ products }: ProductDetailsProps) {
             </div>
           </div>
         </div>
+
+        {recentlyViewedProducts.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-2xl font-bold text-dark-900 mb-8">Recently Viewed</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {recentlyViewedProducts.map((item) => (
+                <Link
+                  key={item.id}
+                  to={`/product/${item.id}`}
+                  className="card p-4 hover:-translate-y-1 transition-transform"
+                >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-40 object-cover rounded-lg mb-3"
+                  />
+                  <h3 className="font-semibold text-dark-900 mb-2 line-clamp-2">{item.name}</h3>
+                  <p className="text-primary-600 font-bold">{new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                  }).format(item.price)}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Product Reviews Section */}
         <div className="mt-16">

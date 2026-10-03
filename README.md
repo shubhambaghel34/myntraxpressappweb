@@ -123,6 +123,24 @@ npm run build:analyze # Analyze bundle size
 ```bash
 npm test          # Run tests in watch mode
 npm run test:coverage # Run tests with coverage
+npm run check:branch  # Validate branch naming convention
+npm run ci:verify     # Run lint, type-check, tests, and production build
+```
+
+## 🛡️ Production Quality Gates
+
+This project includes a basic production-ready pipeline for GitHub Actions:
+
+- Branch naming validation on pull requests
+- Linting, TypeScript validation, test execution, and production build in CI
+- SonarQube config for static code quality analysis
+
+Example branch naming:
+```bash
+feature/add-product-filter
+fix/cart-item-total
+hotfix/payment-redirect
+release/v1.2.0
 ```
 
 ## 🚀 Deployment to Vercel
