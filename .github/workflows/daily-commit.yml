@@ -32,10 +32,55 @@ jobs:
           DAY=$(node -e "console.log(require('./progress.json').currentDay)")
           echo "day=$DAY" >> $GITHUB_OUTPUT
 
+      - name: Read Daily Requirement
+        id: requirement
+        env:
+          DAY: ${{ steps.progress.outputs.day }}
+        run: |
+          requirement=$(node <<'EOF'
+          const fs = require('fs');
+          const day = Number(process.env.DAY);
+          const lines = fs.readFileSync('requirement.md', 'utf8').split(/\r?\n/);
+          const heading = `## Day ${day}`;
+          const start = lines.indexOf(heading);
+          if (start === -1) {
+            console.error(`Requirement for day ${day} not found.`);
+            process.exit(1);
+          }
+          const requirement = lines.slice(start + 1).find(line => line.trim().length > 0) || '';
+          console.log(requirement);
+          EOF
+          )
+          echo "requirement=$requirement" >> $GITHUB_OUTPUT
+
+      - name: Generate Daily Requirement Source
+        env:
+          DAY: ${{ steps.progress.outputs.day }}
+          REQUIREMENT: ${{ steps.requirement.outputs.requirement }}
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const day = Number(process.env.DAY);
+          const requirement = process.env.REQUIREMENT || '';
+          const content = `export interface DailyRequirement {
+            day: number;
+            requirement: string;
+          }
+
+          const dailyRequirement: DailyRequirement = {
+            day: ${day},
+            requirement: ${JSON.stringify(requirement)},
+          };
+
+          export default dailyRequirement;
+          `;
+          fs.writeFileSync('src/dailyRequirement.ts', content.trim() + '\n');
+          EOF
+
       - name: Update Activity
         run: |
           mkdir -p automation
-          echo "Day ${{ steps.progress.outputs.day }} completed on $(date)" >> automation/activity.log
+          echo "Day ${{ steps.progress.outputs.day }} - ${{ steps.requirement.outputs.requirement }} completed on $(date)" >> automation/activity.log
 
       - name: Build
         run: npm run build --if-present
@@ -44,12 +89,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          node << 'EOF'
-          const fs = require('fs');
-          const p = JSON.parse(fs.readFileSync('./progress.json', 'utf8'));
-          p.currentDay = (p.currentDay || 0) + 1;
-          fs.writeFileSync('./progress.json', JSON.stringify(p, null, 2));
-          EOF
-          git add .
+          node -e "const fs = require('fs'); const p = JSON.parse(fs.readFileSync('./progress.json', 'utf8')); p.currentDay = (p.currentDay || 0) + 1; fs.writeFileSync('./progress.json', JSON.stringify(p, null, 2));"
+          git add progress.json automation/activity.log src/dailyRequirement.ts
           git commit -m "feat: day-${{ steps.progress.outputs.day }} improvement" || exit 0
           git push

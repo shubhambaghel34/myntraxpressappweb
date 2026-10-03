@@ -4,6 +4,7 @@ import { Product, CartItem, WishlistItem, User } from '../types';
 interface AppState {
   cart: CartItem[];
   wishlist: WishlistItem[];
+  recentlyViewed: Product[];
   user: User | null;
   searchQuery: string;
   filters: {
@@ -23,15 +24,28 @@ type AppAction =
   | { type: 'UPDATE_CART_QUANTITY'; payload: { productId: number; quantity: number } }
   | { type: 'ADD_TO_WISHLIST'; payload: Product }
   | { type: 'REMOVE_FROM_WISHLIST'; payload: number }
+  | { type: 'ADD_RECENTLY_VIEWED'; payload: Product }
   | { type: 'SET_USER'; payload: User | null }
   | { type: 'SET_SEARCH_QUERY'; payload: string }
   | { type: 'SET_FILTERS'; payload: Partial<AppState['filters']> }
   | { type: 'CLEAR_CART' }
   | { type: 'CLEAR_WISHLIST' };
 
+const getStoredRecentlyViewed = (): Product[] => {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const stored = window.localStorage.getItem('desimyntra_recently_viewed');
+    return stored ? JSON.parse(stored) as Product[] : [];
+  } catch (error) {
+    return [];
+  }
+};
+
 const initialState: AppState = {
   cart: [],
   wishlist: [],
+  recentlyViewed: getStoredRecentlyViewed(),
   user: null,
   searchQuery: '',
   filters: {
@@ -108,6 +122,16 @@ function appReducer(state: AppState, action: AppAction): AppState {
         wishlist: state.wishlist.filter(item => item.product.id !== action.payload)
       };
 
+    case 'ADD_RECENTLY_VIEWED': {
+      const deduped = state.recentlyViewed.filter(item => item.id !== action.payload.id);
+      const updated = [action.payload, ...deduped].slice(0, 5);
+
+      return {
+        ...state,
+        recentlyViewed: updated
+      };
+    }
+
     case 'SET_USER':
       return {
         ...state,
@@ -156,6 +180,12 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('desimyntra_recently_viewed', JSON.stringify(state.recentlyViewed));
+    }
+  }, [state.recentlyViewed]);
 
   const cartTotal = state.cart.reduce(
     (total, item) => total + (item.product.price * item.quantity),

@@ -1,0 +1,20 @@
+name: Branch Name Check
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+
+jobs:
+  validate-branch-name:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Validate branch naming convention
+        run: bash scripts/validate-branch-name.sh "${{ github.head_ref }}"
