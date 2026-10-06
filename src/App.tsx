@@ -15,8 +15,8 @@ import { Product, Category } from './types';
 
 // Import dummy data
 import productsData from './data/products.json';
+import expandedCatalogData from './data/expandedCatalog.json';
 import categoriesData from './data/categories.json';
-import dailyRequirement from './dailyRequirement';
 
 function AppContent() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -29,7 +29,7 @@ function AppContent() {
       try {
         // In a real app, this would be API calls
         await new Promise(resolve => setTimeout(resolve, 500));
-        setProducts(productsData);
+        setProducts([...productsData, ...expandedCatalogData]);
         setCategories(categoriesData);
       } catch (error) {
         console.error('Error loading data:', error);
@@ -46,7 +46,7 @@ function AppContent() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading DesiMyntra...</p>
+          <p className="text-gray-600">Loading MyntraXpress...</p>
         </div>
       </div>
     );
@@ -57,20 +57,6 @@ function AppContent() {
       <div className="min-h-screen bg-gray-50">
         <Header categories={categories} />
         
-        <div className="bg-primary-50 border-b border-primary-200 py-6">
-          <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-primary-700 font-semibold">Daily Improvement</p>
-              <h1 className="text-2xl md:text-3xl font-bold text-dark-900 mt-2">Day {dailyRequirement.day} Task</h1>
-              <p className="mt-2 text-gray-700 max-w-2xl">{dailyRequirement.requirement}</p>
-            </div>
-            <div className="bg-white rounded-2xl shadow-sm p-5 text-center">
-              <p className="text-sm text-gray-500">Current requirement file</p>
-              <p className="text-3xl font-bold text-primary-600 mt-2">Day {dailyRequirement.day}</p>
-            </div>
-          </div>
-        </div>
-
         <main>
           <Routes>
             <Route path="/" element={<LandingPage products={products} categories={categories} />} />
@@ -105,7 +91,7 @@ function AppContent() {
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-4 gap-8">
               <div>
-                <h3 className="text-xl font-bold text-primary-400 mb-4">DesiMyntra</h3>
+                <h3 className="text-xl font-bold text-primary-400 mb-4">MyntraXpress</h3>
                 <p className="text-gray-300 text-sm">
                   Your one-stop destination for quality products at unbeatable prices.
                 </p>
@@ -151,7 +137,7 @@ function AppContent() {
             </div>
             
             <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-              <p>&copy; 2024 DesiMyntra. All rights reserved.</p>
+              <p>&copy; 2024 MyntraXpress. All rights reserved.</p>
             </div>
           </div>
         </footer>

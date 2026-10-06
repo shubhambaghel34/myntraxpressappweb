@@ -8,6 +8,18 @@ interface HeaderProps {
   categories: Category[];
 }
 
+const BrandLogo = () => (
+  <div className="flex items-center space-x-3" aria-label="MyntraXpress home">
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#ff3e6c] via-[#ff7a59] to-[#f13ab1] shadow-md">
+      <span className="text-lg font-black text-white">M</span>
+    </div>
+    <div className="flex flex-col leading-none">
+      <span className="text-lg font-black tracking-tight text-gray-900">Myntra</span>
+      <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#ff3e6c]">Xpress</span>
+    </div>
+  </div>
+);
+
 const Header: React.FC<HeaderProps> = ({ categories }) => {
   const { state, dispatch } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,8 +44,8 @@ const Header: React.FC<HeaderProps> = ({ categories }) => {
           {/* Left side: Logo and Navigation */}
           <div className="flex items-center space-x-8">
             {/* Company Logo */}
-            <Link to="/" className="text-2xl font-bold text-gray-800" aria-label="DesiMyntra - Go to homepage">
-              DesiMyntra
+            <Link to="/" className="hover:opacity-90 transition-opacity" aria-label="MyntraXpress - Go to homepage">
+              <BrandLogo />
             </Link>
 
             {/* Navigation Links */}
@@ -208,8 +220,8 @@ const Header: React.FC<HeaderProps> = ({ categories }) => {
         <div className="lg:hidden py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="text-xl font-bold text-gray-800" aria-label="DesiMyntra - Go to homepage">
-              DesiMyntra
+            <Link to="/" className="hover:opacity-90 transition-opacity" aria-label="MyntraXpress - Go to homepage">
+              <BrandLogo />
             </Link>
 
             {/* Mobile Menu Button */}

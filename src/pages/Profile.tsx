@@ -62,7 +62,7 @@ export default function Profile() {
               {isLoginForm ? 'Welcome Back' : 'Create Account'}
             </h2>
             <p className="text-dark-600">
-              {isLoginForm ? 'Sign in to your account' : 'Join DesiMyntra today'}
+              {isLoginForm ? 'Sign in to your account' : 'Join MyntraXpress today'}
             </p>
           </div>
 
